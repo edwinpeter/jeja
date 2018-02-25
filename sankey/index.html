@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>Choropleth Tutorial - Leaflet</title>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet -->
+    <link rel="stylesheet" href="leaflet/leaflet.css"/>
+
+ <!--bootstrap-->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+
+    <!--Map Styles -->
+    <link rel="stylesheet" type="text/css" href="style/map.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.0/css/mdb.min.css" rel="stylesheet">
+    <!--D3-->
+    <script src="d3/d3.v3.min.js"></script>
+    <script src="leaflet/leaflet.js"></script>
+    <script src="d3/spatialsankey.js"></script>
+    <!--bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- JQuery -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!-- Bootstrap tooltips -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.13.0/umd/popper.min.js"></script>
+<!-- Bootstrap core JavaScript -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<!-- MDB core JavaScript -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.5.0/js/mdb.min.js"></script>
+
+<script src='jqueryui/jquery-ui.js'></script>
+
+<style>
+body {
+  position: absolute;
+  width:100%;
+  height: 100%;
+  margin: 0px;
+  font-family: sans-serif;
+}
+#map {
+  top:0px;
+  left:0px;
+  right:0px;
+  height: 100%;
+}
+path {
+  fill: none;
+  stroke: #4682B4;
+  stroke-opacity: 0.6;
+  stroke-linecap: round;
+  cursor: pointer;
+}
+path:hover {
+  stroke-opacity: 0.8;
+  stroke: #315B7E;
+}
+.curvesettings {
+  position: absolute;
+  right: 10px;
+  top:6px;
+}
+.box {
+  border: 1px solid #EEE;
+  margin: 3px;
+  padding: 5px;
+  background-color: white;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+.title {
+  font-weight: 600;
+}
+.source {
+  position: absolute;
+  width: 20%;
+  top: 6px;
+  left: 50px;
+}
+</style>
+
+</head>
+
+<body>
+	<nav class="navbar navbar-dark bg-dark">
+	  <span class="navbar-brand mb-0 h1">Third Destinition Density Heatmap</span>
+	</nav>
+  <div class="row" style="height:100%">
+    <div class = "col-9" style="padding-right: 0px">
+    <div id='map'></div>
+      <!-- <div class="source box">
+        <div class="title">Shag-la-dey</div>
+      </div> -->
+
+    </div>
+<div class="col-3" style= "margin-top: 20px">
+	<br/>
+  <button onclick="swap()">change</button>
+  <select id="inds">
+  		<option value="" selected="selected">Select a timing</option>
+  		<option value="8">8am - 12pm</option>
+  		<option value="12">12pm - 4pm</option>
+  		<option value="16">4pm - 8pm</option>
+  		<option value="20">8pm - 12am</option>
+  </select>
+  <br/>
+  <div id="orchard" style="display: block">
+    <h2>Location: Boulevard</h2>
+    <br/>
+
+    <div class="border border-secondary rounded" style="text-align: center">
+      <canvas id="barChart" style="width:100%, height:100%"></canvas>
+    <h8> min</h8>
+    </div>
+    <br/>
+    <br/>
+    <h4> Properties</h4>
+    <h5> third location destination:<span style="color: red"> High</span></h5>
+    <h5> willingness to travel: <span style="color: red"> High</span> </h5>
+  </div>
+
+  <div id="aljunied" style="display: none">
+    <h2>Location: Aljunied</h2>
+    <br/>
+    <div class="border border-secondary rounded" >
+      <canvas id="barChart1" style="width:100%, height:100%"></canvas>
+    </div>
+    <br/>
+    <br/>
+    <h4> Properties</h4>
+    <h5> third location destination:<span style="color: red"> High</span></h5>
+    <h5> willingness to travel: <span style="color: red"> High</span> </h5>
+  </div>
+  <!-- <table id="tableA" style="height: 100px">
+  <tr>
+    <td>Link</td>
+    <td>Count</td>
+  </tr>
+   </table>-->
+</div>
+<!-- <button onclick="swap()">change</button>
+ -->
+
+
+
+
+<style>
+
+.mapbox {
+    position: relative;
+}
+
+.mapbox .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 314159;
+    pointer-events: none;
+}
+
+.mapbox .overlay .btn {
+    pointer-events: initial;
+}
+</style>
+
+
+<script type="text/javascript" src = "census.js"></script>
+
+
+<script type="text/javascript">
+
+  var map = L.map('map').setView([1.3521,103.8198], 12);
+
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+    maxZoom: 18,
+    subdomains: ['','a.','b.','c.','d.'],
+    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+      '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    id: 'mapbox.streets'
+  }).addTo(map);
+
+  var zoomBack = L.control({position: 'topleft'});
+      zoomBack.onAdd = function(map){
+          this._div = L.DomUtil.create('div');
+          this._div.innerHTML = '<img src="images/zoom2.png" style="width: 30px" alt="zoomback" id="zoomback" title="zoomback"/>';
+          return this._div;
+      };
+
+  zoomBack.addTo(map);
+  $('#zoomback').on('click', function (event) {
+      map.setView([1.3521,103.8198], 12);
+  });
+
+</script>
+<script type="text/javascript" src = "js/sankey.js"></script>
+<script type="text/javascript" src = "js/demo.js"></script>
+
+<script>
+      var bounds_group = new L.featureGroup([]);
+
+    var baseMaps = {
+        "Streets": map
+    };
+    var cities = L.layerGroup(geojson);
+    var overlayMaps = {
+        "Cities": cities
+    };
+
+    // var layer_Centroids_1 = new L.geoJson(census, {
+    //     attribution: '<a href=""></a>',
+    //     pane: 'pane_Centroids_1',
+    //     onEachFeature: onEachFeature,
+    //     pointToLayer: function (feature, latlng) {
+    //         var context = {
+    //             feature: feature,
+    //             variables: {}
+    //         };
+    //         return L.circleMarker(latlng, style_Centroids_1_0(feature));
+    //     },
+    // });
+    bounds_group.addLayer(geojson);
+    map.addLayer(geojson);
+
+  L.control.layers(baseMaps,{'<img src="images/zoom.png" style="width:20px" /> Subzone Demographics': geojson,}).addTo(map);
+</script>
+
+
+
+<script>
+function swap() {
+    var x = document.getElementById("orchard");
+    var y = document.getElementById("aljunied");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+        y.style.display = "none";
+    } else {
+        x.style.display = "none";
+        y.style.display = "block";
+    }
+}
+
+
+
+
+
+var ctxB = document.getElementById("barChart").getContext('2d');
+var myBarChart = new Chart(ctxB, {
+    type: 'bar',
+    data: {
+        labels: ["10", "20", "30", "40", "50", "60"],
+        datasets: [{
+            label: 'Travel Duration(Min)',
+            data: [1, 3, 3, 2, 1, 0],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+
+var ctxB1 = document.getElementById("barChart1").getContext('2d');
+var myBarChart1 = new Chart(ctxB1, {
+    type: 'bar',
+    data: {
+        labels: ["10", "20", "30", "40", "50", "60"],
+        datasets: [{
+            label: 'Travel Duration Distribution',
+            data: [3, 5, 2, 0, 0, 0],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+});
+
+
+
+// var markersA = [];
+//   var markersB = [];
+//   var markersC = [];
+//   var markersD = [];
+//   var groupA = L.layerGroup(markersA);
+//   var groupB = L.layerGroup(markersB);
+//   var groupC = L.layerGroup(markersC);
+//   var groupD = L.layerGroup(markersD);
+
+//   var tileLayer = {'Gray' : L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png')
+//   };
+
+//   var overlayMaps = {
+//       "Morning": groupA,
+//       "Afternoon": groupB,
+//       "Evening": groupC,
+//       "Night": groupD
+//   };
+
+//   L.control.layers(overlayMaps,null,{position:'topleft'}).addTo(map);
+
+
+
+   
+
+
+</script>
+
+
+
+</body>
+</html>
